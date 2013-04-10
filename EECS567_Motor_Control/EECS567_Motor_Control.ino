@@ -11,11 +11,25 @@
 #define M4_PWM_PIN 10
 #define M5_PWM_PIN 11
 
+const int MOTOR_PWM_PINS[] = {
+  M1_PWM_PIN,
+  M2_PWM_PIN,
+  M3_PWM_PIN,
+  M4_PWM_PIN,
+  M5_PWM_PIN};
+
+
 #define M1_DIR_PIN 2
 #define M2_DIR_PIN 4
 #define M3_DIR_PIN 7
 #define M4_DIR_PIN 8
 #define M5_DIR_PIN 12
+const int MOTOR_DIR_PINS[] = {
+  M1_DIR_PIN,
+  M2_DIR_PIN,
+  M3_DIR_PIN,
+  M4_DIR_PIN,
+  M5_DIR_PIN};
 
 #define M1_POS_PIN 0
 #define M2_POS_PIN 1
@@ -72,32 +86,13 @@ void setup()
 void loop() 
 { 
 
-  //Calcualte Error in Postion2
-  M2PWM = calculatePWM(M2);
-  if (M2PWM>255){
-    analogWrite(M2_PWM_PIN,255);
-  }
-  else{
-    analogWrite(M2_PWM_PIN,M2PWM);
-  }
+//MOTOR CONTROL
+  motorControl();
 
-  if(cur_Direction[M2]){
-    digitalWrite(M2_DIR_PIN, HIGH);
-  }
-  else{
-    digitalWrite(M2_DIR_PIN, LOW);
-  }
+//STREAM DATA
+  streamData();
 
-
-  //Serial.print("\nM2 PWM:\t");
-  Serial.print(M2PWM);
-  //Serial.print("\nM2 Analog:\t");
-  //Serial.print(M2PWM);Serial.print("\t");
-   Serial.print("\t");
-  Serial.print(analogRead(M2));
-  Serial.print("\t");
-
-  //Manage Serial
+//Manage Serial
   while(Serial.available()){
     delay(10);
     int c = Serial.read();
@@ -155,7 +150,7 @@ unsigned int calculatePWM(int motorNum){
   else{
     cur_Direction[motorNum] = 1;
   }
-  
+
   pControl = abs(Kp[motorNum]*error);
   Control = abs(iControl)+ pControl;
   if (abs(error)<3){
@@ -206,7 +201,32 @@ void receiveSerial(int rc){
   }
 }
 
+void motorControl(void){
+  int motorNum;
+  int motorPWM;
+  for(motorNum=0;motorNum<4;motorNum++){
+    motorPWM = calculatePWM(motorNum);
 
+    if (motorPWM>255) motorPWM = 255;
+    analogWrite(MOTOR_PWM_PINS[motorNum],motorPWM);
+
+    if(cur_Direction[M2]){
+      digitalWrite(MOTOR_DIR_PINS[motorNum], LOW);
+    }
+    else{
+      digitalWrite(MOTOR_DIR_PINS[motorNum], HIGH);
+    }
+  }
+}
+
+void streamData(void){
+  int motorNum;
+  for(motorNum=0;motorNum<4;motorNum++){
+    Serial.print(analogRead(motorNum));
+    Serial.print("\t");
+  }
+  Serial.println();
+}
 
 
 
