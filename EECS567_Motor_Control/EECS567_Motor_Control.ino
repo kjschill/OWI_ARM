@@ -1,9 +1,12 @@
+//#define TEST //COMMENT TO RUN IN NORMAL MODE :-)
+
 //Define PIN LOCATIONS
 #define M1 0
 #define M2 1
 #define M3 2
 #define M4 3
 #define M5 4
+int n = M5; //TEST MOTOR
 
 #define M1_PWM_PIN   3
 #define M2_PWM_PIN 5
@@ -45,19 +48,24 @@ const int MOTOR_DIR_PINS[] = {
 #define CMD_SET_GRIPPER 4
 
 int pos_Targets[] = {
-  0,0,0,0};
+  0,0,0,0,0};
 boolean cur_Direction[] = {
-  0,0,0,0};
+  0,0,0,0,0};
 
 int prevPostion[] = {
-  0,0,0,0};
+  0,0,0,0,0};
 int prevError[] = {
-  0,0,0,0};
-int Kp[] = {
-  2,2,2,2};
-int Ki[] = {
-  1,1,1,1};
+  0,0,0,0,0};
+float Kp[] = {
+  .35,.25,.25,.25,.05};
+float Ki[] = {
+  .15,.15,.15,.15,.01};
+int minPWM[] = {100,100,100,100,50};
 
+int FVector[] = {
+  LOW,HIGH,HIGH,LOW,LOW};
+int RVector[] = {
+  HIGH,LOW,LOW,HIGH,HIGH};
 int FORWARD  = 0xFF;
 int  REVERSE = 0xBB;
 int START_CMD = 0x55;
@@ -72,8 +80,10 @@ int maxPos[] = {
   1,2,3,4,5};
 int minPos[] = {
   1,2,3,4,5};
-int M2PWM = 0;
+int MPWM = 0;
 
+int transmitEveryMS = 1000; //Once Per Second
+unsigned long nextTransmit = transmitEveryMS;
 void setup() 
 { 
   Serial.begin(9600);
@@ -86,13 +96,41 @@ void setup()
 void loop() 
 { 
 
-//MOTOR CONTROL
+  #ifdef TEST
+  MPWM = calculatePWM(n);
+
+  Serial.print("Target:\t");
+  Serial.print(pos_Targets[n]);
+  Serial.print("\tCurrent:\t");
+  Serial.print(analogRead(n));
+  Serial.print("\tPWM:\t");
+  Serial.print(MPWM);
+  Serial.print("\tDIR:\t");
+  
+  if (MPWM>255) {MPWM = 255;}
+  
+  analogWrite(MOTOR_PWM_PINS[n],MPWM);
+  
+  if(cur_Direction[n]){
+    Serial.println(FVector[n]);
+    digitalWrite(MOTOR_DIR_PINS[n], FVector[n]);
+  }
+  else{
+    Serial.println(RVector[n]);
+    digitalWrite(MOTOR_DIR_PINS[n], RVector[n]);
+  }
+  #else
+  
+  //MOTOR CONTROL
   motorControl();
 
-//STREAM DATA
+  //STREAM DATA
   streamData();
+  #endif
 
-//Manage Serial
+
+
+  //Manage Serial
   while(Serial.available()){
     delay(10);
     int c = Serial.read();
@@ -119,7 +157,7 @@ void setupPins(){
 void initPostions(){
   int i;
   int pos;
-  for(i=0;i<4;i++){
+  for(i=0;i<5;i++){
     pos = analogRead(i);
     prevPostion[i] = pos;
     pos_Targets[i] = pos;
@@ -132,18 +170,21 @@ unsigned int calculatePWM(int motorNum){
   int pControl;
   int iControl;
   int Control;
-  if(motorNum>4){
+  if(motorNum>5){
     return 0;
   }
   //Calcualte Porportional Gain
   curPos = analogRead(motorNum);
   error  = pos_Targets[motorNum]-curPos;
-  Serial.println(pos_Targets[motorNum]);
+  //Serial.println(pos_Targets[motorNum]);
   //Deterimine Direction
   //Create Proportional Gain
   prevError[motorNum] = prevError[motorNum]+error;
   iControl = Ki[motorNum]*prevError[motorNum];
-  if(error<0)
+  if (iControl>255)
+    prevError[motorNum] = 255/Ki[motorNum];
+
+  if(error < 0)
   {
     cur_Direction[motorNum] = 0;
   }
@@ -152,8 +193,8 @@ unsigned int calculatePWM(int motorNum){
   }
 
   pControl = abs(Kp[motorNum]*error);
-  Control = abs(iControl)+ pControl;
-  if (abs(error)<3){
+  Control = abs(iControl)+ pControl+minPWM[motorNum];
+  if (abs(error)<8){
     prevError[motorNum] = 0;
     Control = 0;
   }
@@ -178,7 +219,7 @@ void receiveSerial(int rc){
     }
     break;
   case CMD_SET_MOTOR:                         //Get Motor	                
-    if(rc<4)
+    if(rc<5)
     {
       m=rc;
       ++state;
@@ -204,29 +245,35 @@ void receiveSerial(int rc){
 void motorControl(void){
   int motorNum;
   int motorPWM;
-  for(motorNum=0;motorNum<4;motorNum++){
+  
+  for(motorNum=0;motorNum<5;motorNum++){
     motorPWM = calculatePWM(motorNum);
 
-    if (motorPWM>255) motorPWM = 255;
+    if (motorPWM>255) {motorPWM = 255;}
     analogWrite(MOTOR_PWM_PINS[motorNum],motorPWM);
 
-    if(cur_Direction[M2]){
-      digitalWrite(MOTOR_DIR_PINS[motorNum], LOW);
+    if(cur_Direction[motorNum]){
+      digitalWrite(MOTOR_DIR_PINS[motorNum], FVector[motorNum]);
     }
     else{
-      digitalWrite(MOTOR_DIR_PINS[motorNum], HIGH);
+      digitalWrite(MOTOR_DIR_PINS[motorNum], RVector[motorNum]);
     }
   }
 }
 
 void streamData(void){
   int motorNum;
-  for(motorNum=0;motorNum<4;motorNum++){
+  if (millis()>nextTransmit){
+    
+  for(motorNum=0;motorNum<5;motorNum++){
     Serial.print(analogRead(motorNum));
     Serial.print("\t");
   }
+  nextTransmit = millis()+transmitEveryMS;
   Serial.println();
+  }
 }
+
 
 
 
