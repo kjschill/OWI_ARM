@@ -57,9 +57,9 @@ int prevPostion[] = {
 int prevError[] = {
   0,0,0,0,0};
 float Kp[] = {
-  .35,.25,.25,.25,.05};
+  .35,.25,.25,.25,.25};
 float Ki[] = {
-  .15,.15,.15,.15,.01};
+  .15,.15,.15,.15,.005};
 int minPWM[] = {100,100,100,100,50};
 
 int FVector[] = {
@@ -234,10 +234,10 @@ void receiveSerial(int rc){
     //Serial.print(newPos);				 //Get Target            	
     pos_Targets[m] = newPos*4;
     state = 0;
-    Serial.print("Motor "); 
-    Serial.print(m, DEC);
-    Serial.print(" set at "); 
-    Serial.println(pos_Targets[m]);
+    //Serial.print("Motor "); 
+    //Serial.print(m, DEC);
+    //Serial.print(" set at "); 
+    //Serial.println(pos_Targets[m]);
     break;
   }
 }
