@@ -6,7 +6,7 @@
 #define M3 2
 #define M4 3
 #define M5 4
-int n = M5; //TEST MOTOR
+int n = M1; //TEST MOTOR
 
 #define M1_PWM_PIN   3
 #define M2_PWM_PIN 5
@@ -57,10 +57,11 @@ int prevPostion[] = {
 int prevError[] = {
   0,0,0,0,0};
 float Kp[] = {
-  .35,.25,.25,.25,.25};
+  .4,.4,.4,.15,.2};
 float Ki[] = {
-  .15,.15,.15,.15,.005};
-int minPWM[] = {100,100,100,100,50};
+  .25,.15,.25,.15,.01};
+int minPWM[] = {80,80,80,50,40};
+int maxPWM[] = {255,255,255,200,150};
 
 int FVector[] = {
   LOW,HIGH,HIGH,LOW,LOW};
@@ -82,12 +83,12 @@ int minPos[] = {
   1,2,3,4,5};
 int MPWM = 0;
 
-int transmitEveryMS = 1000; //Once Per Second
+int transmitEveryMS = 250; //Once Per Second
 unsigned long nextTransmit = transmitEveryMS;
 void setup() 
 { 
   Serial.begin(9600);
-  Serial.write("Starting");
+  //Serial.write("Starting");
   setupPins();
   initPostions();
 } 
@@ -194,7 +195,7 @@ unsigned int calculatePWM(int motorNum){
 
   pControl = abs(Kp[motorNum]*error);
   Control = abs(iControl)+ pControl+minPWM[motorNum];
-  if (abs(error)<8){
+  if (abs(error)<4){
     prevError[motorNum] = 0;
     Control = 0;
   }
@@ -249,7 +250,7 @@ void motorControl(void){
   for(motorNum=0;motorNum<5;motorNum++){
     motorPWM = calculatePWM(motorNum);
 
-    if (motorPWM>255) {motorPWM = 255;}
+    if (motorPWM>maxPWM[motorNum]) {motorPWM = maxPWM[motorNum];}
     analogWrite(MOTOR_PWM_PINS[motorNum],motorPWM);
 
     if(cur_Direction[motorNum]){
