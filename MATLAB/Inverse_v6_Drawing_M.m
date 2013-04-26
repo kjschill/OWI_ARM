@@ -1,3 +1,7 @@
+close all;
+clear all;
+clc;
+%startup_rvc;
 %% SERIAL STUFF
 %ME567 PROJECT
 %%CONFIGURATION
@@ -18,7 +22,6 @@ s.UserData.newData = 0;
 % get(s) %Uncomment this line and it gives all the COM port stats. Useful
 % for debugging. 
 % fread(s,1,'char') %Function to read the Serial Port
-
 % Inverse Kinematic
 
 % DH parameters
@@ -58,7 +61,7 @@ L(4)=Link([0,0,11.5,0]);
 owi535=SerialLink(L,'name','OWI-535');
 
 % initial theta with robotic arm “straight up”
-Init_theta = [pi/2 pi/2 0 0];
+Init_theta = [0 pi/2 0 0];
 
 T_init = owi535.fkine(Init_theta);
 Pos_init = T_init(1:3,4);
@@ -72,45 +75,49 @@ owi535.plot(Init_theta);
 % A1 = [15;10;3];
 % A2 = [-15;0;3];
 % A3 = [0;15;15];
-% disp1 = [A1,A2,A3]
+% disp = [A1,A2,A3]
 
-% Draw a line
-linestep = 30;
+%% Draw a line
+linestep = 10;
 latitude = -2.5;
 
-%Desired Starting Position
+% Desired Starting Position
 % A0 = Pos_init;
-A1 = [13.6;23.6;-2.5];
-A2 = [-13.6;23.6;-2.5];
+% A1 = [15;10;3];
+% A2 = [-15;10;3];
+% A3 = Pos_init;
+
+A1 = [5;23.6;-1.75];
+A2 = [-5;23.6;-3];
 A3 = Pos_init;
+
+% trackX = [linspace(A0(1),A1(1),linestep), linspace(A1(1),A2(1),linestep),...
+%             linspace(A2(1),A3(1),linestep)];
+% trackY = [linspace(A0(2),A1(2),linestep),linspace(A1(2),A2(2),linestep),...
+%             linspace(A2(2),A3(2),linestep)];
+% trackZ = [linspace(A1(3),A2(3),linestep),linspace(A1(3),A2(3),linestep),...
+%             linspace(A2(3),A3(3),linestep)];
+        
+% trackX = [linspace(A1(1),A2(1),linestep),...
+%             linspace(A2(1),A3(1),linestep)];
+% trackY = [linspace(A1(2),A2(2),linestep),...
+%             linspace(A2(2),A3(2),linestep)];
+% trackZ = [linspace(A1(3),A2(3),linestep),...
+%             linspace(A2(3),A3(3),linestep)];
+        
+trackX = [linspace(A1(1),A2(1),linestep),A3(1)];
+trackY = [linspace(A1(2),A2(2),linestep),A3(2)];
+trackZ = [linspace(A1(3),A2(3),linestep),A3(3)];
 % 
-% % trackX = [linspace(A0(1),A1(1),linestep), linspace(A1(1),A2(1),linestep),...
-% %             linspace(A2(1),A3(1),linestep)];
-% % trackY = [linspace(A0(2),A1(2),linestep),linspace(A1(2),A2(2),linestep),...
-% %             linspace(A2(2),A3(2),linestep)];
-% % trackZ = [linspace(A1(3),A2(3),linestep),linspace(A1(3),A2(3),linestep),...
-% %             linspace(A2(3),A3(3),linestep)];
-%         
-trackX = [linspace(A1(1),A2(1),linestep),...
-            linspace(A2(1),A3(1),linestep)];
-trackY = [linspace(A1(2),A2(2),linestep),...
-            linspace(A2(2),A3(2),linestep)];
-trackZ = [linspace(A1(3),A2(3),linestep),...
-            linspace(A2(3),A3(3),linestep)];
-%         
-% trackX = [linspace(A1(1),A2(1),linestep),A3(1)];
-% trackY = [linspace(A1(2),A2(2),linestep),A3(2)];
-% trackZ = [linspace(A1(3),A2(3),linestep),A3(3)];
-% 
-disp1 = [trackX;trackY;trackZ];
+disp = [trackX;trackY;trackZ];
 
 
-% %% Draw an M
-% % % desired position 
-% linestep = 10;
-% latitude = -2.5;
-% 
-% % M1
+%% Draw an M
+% % desired position 
+% linestep = 200;
+% latitude = 3;
+
+% M1
 % A0 = [13.6;23;latitude];
 % A1 = [13.6;23;latitude];
 % A2 = [8;15;latitude];
@@ -120,14 +127,14 @@ disp1 = [trackX;trackY;trackZ];
 % 
 % % M2
 % 
-% % A1 = [10;-20;latitude];
-% % A2 = [8;-7;latitude];
-% % A3 = [0;-14;latitude];
-% % A4 = [-8;-7;latitude];
-% % A5 = [-10;-20;latitude];
-
+% % A1 = [10;-20;3];
+% % A2 = [8;-7;3];
+% % A3 = [0;-14;3];
+% % A4 = [-8;-7;3];
+% % A5 = [-10;-20;3];
+% % 
 % A6 = Pos_init;
-
+% % 
 % trackX=[linspace(A0(1),A1(1),linestep), linspace(A1(1),A2(1),linestep),...
 %     linspace(A2(1),A3(1),linestep),linspace(A3(1),A4(1),linestep),...
 %     linspace(A4(1),A5(1),linestep),linspace(A5(1),A6(1),linestep)];
@@ -140,7 +147,7 @@ disp1 = [trackX;trackY;trackZ];
 %     linspace(A2(3),A3(3),linestep),linspace(A3(3),A4(3),linestep),...
 %     linspace(A4(3),A5(3),linestep),linspace(A5(3),A6(3),linestep)];
 % 
-% disp1 = [trackX;trackY;trackZ];
+% disp = [trackX;trackY;trackZ];
 
 %% Draw a circle
 % linestep = 10;
@@ -155,12 +162,12 @@ disp1 = [trackX;trackY;trackZ];
 % trackY = radius*sin(disp_theta);
 % trackZ = latitude*ones(1,size(disp_theta,2))
 % 
-% disp1 = [trackX;trackY;trackZ];
+% disp = [trackX;trackY;trackZ];
 
 
 %% 
 % set desire position
-Pos_desire = disp1;
+Pos_desire = disp;
 
 % set current position
 Current_theta = Init_theta;
@@ -187,11 +194,10 @@ k0 = 0.001;
 deg = pi/180;
 
 % theta limit
-limit_theta_1_p = 135 * deg;
-limit_theta_1_n =  45 * deg;
 
-% limit_theta_2_p = 90 * deg;
-% limit_theta_2_n = -90 * deg;
+limit_theta_1_p = 135 * deg;
+limit_theta_1_n = 45 * deg;
+
 
 limit_theta_2_p = 170 * deg;
 limit_theta_2_n = 10 * deg;
@@ -201,6 +207,19 @@ limit_theta_3_n = -90 * deg;
 
 limit_theta_4_p = 60 * deg;
 limit_theta_4_n = -60 * deg;
+
+% limit_theta_1_p = 235 * deg;
+% limit_theta_1_n = - 45 * deg;
+% 
+% 
+% limit_theta_2_p = 180 * deg;
+% limit_theta_2_n = 0 * deg;
+% 
+% limit_theta_3_p = 150 * deg;
+% limit_theta_3_n = -150 * deg;
+% 
+% limit_theta_4_p = 60 * deg;
+% limit_theta_4_n = -60 * deg;
 
 % for vedio M only
 % limit_theta_1_p = 360 * deg;
@@ -224,6 +243,14 @@ limit_theta_4_n = -60 * deg;
 % 
 % limit_theta_dot_n = - limit_theta_dot_p;
 
+% limit_theta_dot_p = 0.1*[(limit_theta_1_p - limit_theta_1_n) /step;...
+%     (limit_theta_2_p - limit_theta_2_n)/step;...
+%     (limit_theta_3_p - limit_theta_3_n)/step;...
+%     (limit_theta_4_p - limit_theta_4_n)/step];
+% 
+% limit_theta_dot_n = - limit_theta_dot_p;
+
+
 limit_theta_dot_p = 0.1*[270 *deg/step;...
     180*deg/step;...
     300*deg/step;...
@@ -235,10 +262,9 @@ theta_dot_display = [];
 current_theta_display = [];
 current_pos_display = [];
 current_pos_vedio = [];
-Theta_Command = [];%zeros(4,linestep+1);
+Theta_Command = [];
 % h = figure(100);
-its = 0;
-WHEREAMI = 1
+
 for i = 1:1:size(Pos_desire,2) 
 %     h = figure(i);
     while (sqrt(sum((Pos_desire(:,i) - Current_Pos).^2)) > epsilon)
@@ -323,35 +349,69 @@ for i = 1:1:size(Pos_desire,2)
     T_current = owi535.fkine(Current_theta);
     
     % assign this to the current position
-    Current_Pos = T_current(1:3,4);
+    Current_Pos = T_current(1:3,4)
     current_pos_display = [current_pos_display,Current_Pos];
     %   plot(Current_Pos)
-    %owi535.plot(Current_theta);
-    %hold on;
+    owi535.plot(Current_theta);
+    hold on;
     
     if (abs (Current_Pos(3) - latitude) < epsilon )
-        %current_pos_vedio = [current_pos_vedio,Current_Pos];
+        current_pos_vedio = [current_pos_vedio,Current_Pos];
     end
     
     if (~isempty(current_pos_vedio))
-        %plot3(current_pos_vedio(1,:),current_pos_vedio(2,:),...
-           % current_pos_vedio(3,:),'b','LineWidth',3);
+        plot3(current_pos_vedio(1,:),current_pos_vedio(2,:),...
+            current_pos_vedio(3,:),'b','LineWidth',3);
     end
     
     end
     
-        Theta_Command = [Theta_Command,Current_theta'];
-    WHEREAMI = WHEREAMI +1
-    
-    
-    
-    
-    
+    Theta_Command = [Theta_Command,Current_theta'];
     % for vedio record only
     % F(i) = getframe(h);
     % close(h);
     % pause (1)
 end
+hold off
+
+% plot of theta_dot
+figure
+for i = 1:1:size(theta_dot_display,1)
+    subplot(2,2,i)
+    plot(theta_dot_display(i,:))
+    xlabel('step')
+    ylabel(['theta dot ',num2str(i)])
+    grid on
+end
+
+% plot of theta
+figure
+for i = 1:1:size(current_theta_display,1)
+    subplot(2,2,i)
+    plot(current_theta_display(i,:))
+    xlabel('step')
+    ylabel(['theta',num2str(i)])
+    grid on
+end
+
+% plot of position
+Position  = ['X','Y','Z']
+figure 
+for i = 1:1:size(current_pos_display,1)
+    subplot(2,2,i)
+    plot(current_pos_display(i,:))
+    xlabel('step')
+    ylabel([Position(i)])
+    grid on
+end    
+   
+figure
+plot3(current_pos_display(1,:),current_pos_display(2,:),current_pos_display(3,:))
+grid on
+
+%% ARDUINO CONTROL!!!
+
+its = 0;
 
 Theta_Command = Theta_Command*180/pi
 for i = 1:1:size(Theta_Command,2)
@@ -373,54 +433,6 @@ for i = 1:1:size(Theta_Command,2)
     its = 0;
     
 end
-
-
-
-
-
-
-
-
-
-% 
-% its = 0;
-% hold off
-% 
-% % plot of theta_dot
-% figure
-% for i = 1:1:size(theta_dot_display,1)
-%     subplot(2,2,i)
-%     plot(theta_dot_display(i,:))
-%     xlabel('step')
-%     ylabel(['theta dot ',num2str(i)])
-%     grid on
-% end
-% 
-% % plot of theta
-% figure
-% for i = 1:1:size(current_theta_display,1)
-%     subplot(2,2,i)
-%     plot(current_theta_display(i,:))
-%     xlabel('step')
-%     ylabel(['theta',num2str(i)])
-%     grid on
-% end
-% 
-% % plot of position
-% Position  = ['X','Y','Z']
-% figure 
-% for i = 1:1:size(current_pos_display,1)
-%     subplot(2,2,i)
-%     plot(current_pos_display(i,:))
-%     xlabel('step')
-%     ylabel([Position(i)])
-%     grid on
-% end    
-%    
-% figure
-% plot3(current_pos_display(1,:),current_pos_display(2,:),current_pos_display(3,:))
-% grid on
-% owi535.teach
 
 %% Generate Vedio
 % writerObj = VideoWriter('simulationM.avi');

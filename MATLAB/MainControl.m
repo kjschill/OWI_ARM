@@ -27,24 +27,31 @@ s.UserData.newData = 0;
 %   4. Repeat 2 and 3 until path complete
 %   5. Drink Beer
 
-DesiredPoistion = [[90 90 0]
-                    [45 45 45]
-                    [45 30 60]
-                    [45 45 45]
-                    [90 90 0]];
-
+DesiredPoistion = [[90 90 0 -45 10]
+                    [50 45 -45 -45 0]
+                    [50 25 -55 -45 0]
+                    [50 25 -55 -45 70]
+                    [50 45 -45 -45 70]
+                    [110 50 -45 -45 70]
+                    [110 45 -55 -45 70]
+                    [110 28 -55 -45 70]
+                    [110 28 -55 -45 0]
+                    [110 45 -55 -45 0]
+                    [90 90 0 -45 0]];
+its = 0;
 for i = 1:size(DesiredPoistion,1)
     %Send New Command
-    for j = 1:3
+    pause
+    for j = 1:5
         setJointPos(s,j-1,DesiredPoistion(i,j))
         pause(.05)
     end
-    while(max(s.UserData.newData(1:3)-DesiredPoistion(i,:))>3)
+    while(max(s.UserData.newData(1:3)-DesiredPoistion(i,1:3))>3)
         its = its+1
-        if(its>200)
+        if(its>20)
             break
         end
-        s.UserData.newData(1:3)-DesiredPoistion(i,:)
+        s.UserData.newData(1:3)-DesiredPoistion(i,1:3)
         pause(.25)
     end
     its = 0;
